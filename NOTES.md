@@ -77,3 +77,12 @@
 
 # Topic 11: Readable titles
 - Jo title 3 se zyada pages par repeat ho, uski jagah URL se naam: /tag/love/ -> "Tag: love"
+
+# Topic 12: TF-IDF (better ranking)
+- TF = shabd kitni baar aaya, IDF = shabd kitna rare hai
+- Weight = TF x log(1 + total pages / pages jisme shabd hai)
+- Common shabd ("the") ka weight kam, rare shabd ("love") ka zyada
+- Stopwords (the, is, of...) query se hata do
+- Snippet pehle non-stopword shabd par banao
+- Result: "the love" mein ab sirf "love" matter karta hai
+- Code: webapp.py (backup: webapp_titles.py)

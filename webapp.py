@@ -1,9 +1,12 @@
-import re, sqlite3
+import re, sqlite3, math
 from urllib.parse import urlparse
 from collections import defaultdict, Counter
 from flask import Flask, request, render_template_string
 
 app = Flask(__name__)
+
+STOP = {"the","a","an","is","are","was","were","of","to","in","on","and","or","it","this","that","for","with","as","at","by","be"}
+NPAGES = 1
 
 def words(t):
     return re.findall(r"\w+", t.lower())
@@ -60,14 +63,16 @@ def load():
             index[w][i] = index[w].get(i, 0) + c
         for w in set(sw(title)):
             index[w][i] = index[w].get(i, 0) + 5
+    global NPAGES
+    NPAGES = len(pages)
     return pages, index, rank
 
 def search(q, index, n=10):
-    ws = sw(q)
+    ws = [stem(w) for w in words(q) if w not in STOP] or sw(q)
     if not ws:
         return []
     ok = set.intersection(*[set(index.get(w, {})) for w in ws])
-    scored = sorted(((sum(index[w][i] for w in ws), i) for i in ok), reverse=True)
+    scored = sorted(((sum(index[w][i] * math.log(1 + NPAGES / len(index[w])) for w in ws), i) for i in ok), reverse=True)
     return scored[:n]
 
 def snippet(body, w):
@@ -106,7 +111,7 @@ def home():
         for score, i in sorted(((s * (1 + 10 * rank.get(pages[j][0], 0)), j) for s, j in search(q, index, 50)), reverse=True)[:10]:
             url, title, body = pages[i]
             results.append({"url": url, "title": nice(title, url) if tc[title] > 3 else (title or url),
-                            "snip": snippet(body, stem(words(q)[0])), "score": round(score, 1)})
+                            "snip": snippet(body, stem(([w for w in words(q) if w not in STOP] or words(q))[0])), "score": round(score, 1)})
     return render_template_string(PAGE, q=q, results=results)
 
 if __name__ == "__main__":
