@@ -60,3 +60,20 @@
 - Har request pe pages.db se index banta hai (chhote data ke liye theek)
 - Code: ~/search_engine/webapp.py, run: python3 webapp.py, kholo: 127.0.0.1:5002
 
+
+# Topic 8: Crawler ko scale karna
+- Queue + seen set + LIMIT: naye links queue mein, purane dobara nahi
+- URL normalize zaroori: http/https aur /page/1/ jaise duplicate URLs ek hi page hain
+- Check: select count(*), count(distinct body) from pages
+- Code: crawl3.py
+
+# Topic 9: PageRank + search score
+- Final score = text score x (1 + 10 x PageRank)
+- Flat site par farak chhota, badi site par zyada
+
+# Topic 10: Stemming
+- loved, loves, lovers -> lov (index aur query dono mein same stem)
+- Snippet bhi stem se dhoondna padta hai
+
+# Topic 11: Readable titles
+- Jo title 3 se zyada pages par repeat ho, uski jagah URL se naam: /tag/love/ -> "Tag: love"
