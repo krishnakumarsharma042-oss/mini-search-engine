@@ -6,7 +6,7 @@ A small search engine built from scratch in Python, to learn how Google-style se
 - **Crawler** (`crawl3.py`): downloads pages from one site, follows its links, respects robots.txt, waits 1 second between requests, normalizes URLs (no duplicate pages) and saves title, text and links in SQLite.
 - **Index and search** (`search.py`): builds an inverted index and ranks results by word count (title words count extra).
 - **PageRank** (`pagerank.py`): ranks pages by how many pages link to them. The web page combines it with the text score.
-- **Web page** (`webapp.py`): a Flask search box with ranked results, stemming (love = loved = lovers), TF-IDF weighting (common words like "the" count less), PageRank boost and readable titles.
+- **Web page** (`webapp.py`): a Flask search box with ranked results, stemming (love = loved = lovers), TF-IDF weighting (common words like "the" count less), PageRank boost, readable titles and search suggestions.
 
 ## Result
 Tested on 44 pages (a to-do app site + quotes.toscrape.com, a practice site made for crawling). Searching "lovers" also finds pages about "love" because of stemming, and "the love" ranks pages by "love" only because of TF-IDF.

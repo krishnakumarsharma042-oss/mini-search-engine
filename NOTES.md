@@ -86,3 +86,11 @@
 - Snippet pehle non-stopword shabd par banao
 - Result: "the love" mein ab sirf "love" matter karta hai
 - Code: webapp.py (backup: webapp_titles.py)
+
+# Topic 13: Search suggestions (autocomplete)
+- Backend: /suggest?q=lov route, JSON mein shabd lautata hai (jsonify)
+- Suggestions asli shabdon se bante hain (love, lovers), stems se nahi
+- Frontend: JavaScript har key press par fetch() se /suggest bulata hai
+- <datalist> se browser khud list dikhata hai
+- Query ke aakhri shabd par suggest hota hai, baaki query waisi hi rehti hai
+- Code: webapp.py (backup: webapp_sug1.py)

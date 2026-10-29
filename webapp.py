@@ -1,7 +1,7 @@
 import re, sqlite3, math
 from urllib.parse import urlparse
 from collections import defaultdict, Counter
-from flask import Flask, request, render_template_string
+from flask import Flask, request, render_template_string, jsonify
 
 app = Flask(__name__)
 
@@ -92,13 +92,32 @@ button{padding:10px 18px;font-size:16px}
 .r{margin:18px 0}.r a{font-size:1.1em}.u{color:gray;font-size:.8em;word-break:break-all}
 </style></head><body>
 <h1>Mini Search</h1>
-<form><input name="q" value="{{ q }}" placeholder="Search..."><button>Search</button></form>
+<form><input name="q" list="sg" autocomplete="off" value="{{ q }}" placeholder="Search..."><button>Search</button></form>
 {% if q %}<p>{{ results|length }} result(s)</p>{% endif %}
 {% for r in results %}
 <div class="r"><a href="{{ r.url }}">{{ r.title }}</a>
 <div class="u">{{ r.url }} | score {{ r.score }}</div>
 <div>{{ r.snip }}</div></div>
 {% endfor %}
+<datalist id="sg"></datalist>
+<script>
+var inp = document.querySelector("input[name=q]");
+var dl = document.getElementById("sg");
+inp.addEventListener("input", function () {
+  var v = inp.value;
+  if (v.length < 2) { return; }
+  fetch("/suggest?q=" + encodeURIComponent(v))
+    .then(function (r) { return r.json(); })
+    .then(function (a) {
+      dl.innerHTML = "";
+      a.forEach(function (w) {
+        var o = document.createElement("option");
+        o.value = w;
+        dl.appendChild(o);
+      });
+    });
+});
+</script>
 </body></html>"""
 
 @app.route("/")
@@ -113,6 +132,20 @@ def home():
             results.append({"url": url, "title": nice(title, url) if tc[title] > 3 else (title or url),
                             "snip": snippet(body, stem(([w for w in words(q) if w not in STOP] or words(q))[0])), "score": round(score, 1)})
     return render_template_string(PAGE, q=q, results=results)
+
+@app.route("/suggest")
+def suggest():
+    q = (request.args.get("q") or "").lower()[:100]
+    parts = q.split(" ")
+    last = parts[-1]
+    if len(last) < 2:
+        return jsonify([])
+    db = sqlite3.connect("pages.db")
+    texts = db.execute("SELECT body FROM pages").fetchall()
+    db.close()
+    c = Counter(w for (b,) in texts for w in words(b) if len(w) >= 3 and w.isalpha() and w not in STOP)
+    hits = [w for w, n in c.most_common() if w.startswith(last) and w != last][:5]
+    return jsonify([" ".join(parts[:-1] + [w]) for w in hits])
 
 if __name__ == "__main__":
     app.run(port=5002)
